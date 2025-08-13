@@ -37,13 +37,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
 
-const score = computed(() => Number(route.query.score) || 0)
+const score = computed(() => {
+  const scoreValue = Number(route.query.score)
+  return isNaN(scoreValue) ? 0 : scoreValue
+})
 
 const getRating = (score: number) => {
   if (score <= 10) return '挠痒专业户'

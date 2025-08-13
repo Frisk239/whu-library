@@ -1,12 +1,20 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+import logging
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
+logging.basicConfig(level=logging.DEBUG)
 
 # 配置
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///game.db'

@@ -68,10 +68,23 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
+interface LeaderboardItem {
+  username: string
+  score: number
+  rating: string
+  avatar_url?: string
+}
+
+interface User {
+  id: number
+  username: string
+  avatar_url?: string
+}
+
 const router = useRouter()
 const showLeaderboard = ref(false)
-const leaderboard = ref([])
-const currentUser = ref(null)
+const leaderboard = ref<LeaderboardItem[]>([])
+const currentUser = ref<User | null>(null)
 
 const startGame = () => {
   router.push('/game')
@@ -89,6 +102,7 @@ const loadLeaderboard = async () => {
     const response = await axios.get('http://localhost:5000/api/leaderboard')
     leaderboard.value = response.data
   } catch (error) {
+    console.error('获取排行榜失败:', error)
     ElMessage.error('获取排行榜失败')
   }
 }

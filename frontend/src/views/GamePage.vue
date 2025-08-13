@@ -165,6 +165,19 @@ const endGame = () => {
         score: score.value
       })
     })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('保存游戏记录失败')
+      }
+      return response.json()
+    })
+    .then(data => {
+      console.log('游戏记录保存成功:', data)
+    })
+    .catch(error => {
+      console.error('保存游戏记录错误:', error)
+      ElMessage.error('保存游戏记录失败，请检查网络连接')
+    })
   }
 
   // 3秒后自动跳转到结果页
