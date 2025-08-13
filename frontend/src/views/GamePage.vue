@@ -18,7 +18,7 @@
         />
       </div>
 
-      <div class="monitor-section">
+      <div class="monitor-section" :class="{ 'watching-bg': monitorWatching }">
         <div class="monitor" :class="{ 'watching': monitorWatching }">
           <div class="monitor-face">
             <div class="eyes">
@@ -30,14 +30,6 @@
           <div class="monitor-status">
             {{ monitorWatching ? '正在偷拍！' : '假装看书' }}
           </div>
-        </div>
-        <div v-if="monitorWatching" class="warning">
-          <el-alert
-            title="警告：管理员正在偷拍！"
-            type="warning"
-            description="不要挠痒，否则会被抓到！"
-            :closable="false"
-          />
         </div>
       </div>
 
@@ -58,10 +50,10 @@
           @mousedown="startTickling"
           @mouseup="stopTickling"
           @mouseleave="stopTickling"
-          :disabled="gameOver || monitorWatching"
+          :disabled="gameOver"
           class="action-btn tickle-btn"
         >
-          长按挠痒 (-2/秒)
+          长按挠痒 (-6/0.7秒)
         </el-button>
       </div>
 
@@ -107,17 +99,17 @@ const study = () => {
 }
 
 const startTickling = () => {
-  if (monitorWatching.value) {
-    ElMessage.error('被管理员发现了！游戏结束！')
-    endGame()
-    return
-  }
-
   if (!gameOver.value) {
     isTickling.value = true
+    // 设置定时器每秒减少痒值
     tickleInterval = window.setInterval(() => {
-      itchLevel.value = Math.max(0, itchLevel.value - 2)
-    }, 1000)
+      if (monitorWatching.value && isTickling.value) {
+        ElMessage.error('被管理员发现了！游戏结束！')
+        endGame()
+        return
+      }
+      itchLevel.value = Math.max(0, itchLevel.value - 6)
+    }, 700)
   }
 }
 
@@ -314,14 +306,18 @@ onUnmounted(() => {
   color: #606266;
 }
 
-.warning {
-  margin-top: 15px;
+.watching-bg {
+  background-color: rgba(245, 108, 108, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  transition: background-color 0.3s ease;
 }
 
 .actions {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 30px;
+  margin: 100px 0 30px;
+  position: relative;
 }
 
 .action-btn {

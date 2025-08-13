@@ -1,11 +1,9 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 from datetime import datetime
 import os
-import uuid
 
 app = Flask(__name__)
 CORS(app)
@@ -28,7 +26,6 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    avatar_url = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class GameRecord(db.Model):
@@ -77,8 +74,7 @@ def register():
     
     return jsonify({
         'id': user.id,
-        'username': user.username,
-        'avatar_url': user.avatar_url
+        'username': user.username
     })
 
 # 用户登录
@@ -95,38 +91,8 @@ def login():
     
     return jsonify({
         'id': user.id,
-        'username': user.username,
-        'avatar_url': user.avatar_url
+        'username': user.username
     })
-
-# 上传头像
-@app.route('/api/upload-avatar', methods=['POST'])
-def upload_avatar():
-    if 'avatar' not in request.files:
-        return jsonify({'error': '没有上传文件'}), 400
-    
-    file = request.files['avatar']
-    user_id = request.form.get('user_id')
-    
-    if not user_id:
-        return jsonify({'error': '缺少用户ID'}), 400
-    
-    if file.filename == '':
-        return jsonify({'error': '没有选择文件'}), 400
-    
-    if file:
-        filename = secure_filename(file.filename)
-        unique_filename = f"{uuid.uuid4()}_{filename}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-        file.save(filepath)
-        
-        # 更新用户头像
-        user = User.query.get(user_id)
-        if user:
-            user.avatar_url = f"/uploads/avatars/{unique_filename}"
-            db.session.commit()
-        
-        return jsonify({'avatar_url': user.avatar_url})
 
 # 保存游戏记录
 @app.route('/api/game-record', methods=['POST'])
@@ -156,7 +122,6 @@ def leaderboard():
     # 获取每个用户的最高分
     leaderboard_data = db.session.query(
         User.username,
-        User.avatar_url,
         db.func.max(GameRecord.score).label('max_score'),
         GameRecord.rating
     ).join(GameRecord).group_by(User.id).order_by(
@@ -164,10 +129,9 @@ def leaderboard():
     ).limit(10).all()
     
     result = []
-    for username, avatar_url, max_score, rating in leaderboard_data:
+    for username, max_score, rating in leaderboard_data:
         result.append({
             'username': username,
-            'avatar_url': avatar_url,
             'score': max_score,
             'rating': rating
         })
@@ -191,11 +155,6 @@ def user_records(user_id):
         })
     
     return jsonify(result)
-
-# 提供头像文件
-@app.route('/uploads/avatars/<filename>')
-def uploaded_file(filename):
-    return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
 @app.route('/')
 def index():

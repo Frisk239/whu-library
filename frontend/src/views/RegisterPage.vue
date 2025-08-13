@@ -26,21 +26,6 @@
           />
         </el-form-item>
 
-        <el-form-item label="头像">
-            <el-upload
-              class="avatar-uploader"
-              :action="`http://localhost:5000/api/upload-avatar`"
-              :show-file-list="false"
-            :on-success="handleAvatarSuccess"
-            :before-upload="beforeAvatarUpload"
-            :data="{ user_id: userId }"
-            :disabled="!userId"
-          >
-            <img v-if="avatarUrl" :src="avatarUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
-        </el-form-item>
-
         <el-form-item>
           <el-button type="primary" @click="handleRegister" :loading="loading" style="width: 100%">
             注册
@@ -59,13 +44,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Plus } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const router = useRouter()
 const registerFormRef = ref()
 const loading = ref(false)
-const avatarUrl = ref('')
 const userId = ref<number | null>(null)
 
 const registerForm = ref({
@@ -114,16 +97,11 @@ const handleRegister = async () => {
         })
 
         userId.value = response.data.id
-        ElMessage.success('注册成功！请上传头像')
 
         // 自动登录
         localStorage.setItem('user', JSON.stringify(response.data))
-
-        // 如果没有上传头像，直接跳转
-        if (!avatarUrl.value) {
-          ElMessage.success('注册完成！')
-          router.push('/')
-        }
+        ElMessage.success('注册成功！')
+        router.push('/')
       } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           ElMessage.error(error.response?.data?.error || '注册失败')
@@ -137,28 +115,6 @@ const handleRegister = async () => {
   })
 }
 
-const handleAvatarSuccess = (response: { avatar_url: string }) => {
-  avatarUrl.value = response.avatar_url
-  // 更新本地存储的用户信息
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
-  user.avatar_url = response.avatar_url
-  localStorage.setItem('user', JSON.stringify(user))
-  ElMessage.success('头像上传成功！')
-  router.push('/')
-}
-
-const beforeAvatarUpload = (file: File) => {
-  const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
-  const isLt2M = file.size / 1024 / 1024 < 2
-
-  if (!isJPG) {
-    ElMessage.error('头像只能是 JPG/PNG 格式!')
-  }
-  if (!isLt2M) {
-    ElMessage.error('头像大小不能超过 2MB!')
-  }
-  return isJPG && isLt2M
-}
 
 const goToLogin = () => {
   router.push('/login')
@@ -189,34 +145,6 @@ const goToLogin = () => {
   color: #303133;
 }
 
-.avatar-uploader {
-  border: 1px dashed #d9d9d9;
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-}
-
-.avatar-uploader:hover {
-  border-color: var(--el-color-primary);
-}
-
-.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 178px;
-  height: 178px;
-  text-align: center;
-  line-height: 178px;
-}
-
-.avatar {
-  width: 178px;
-  height: 178px;
-  display: block;
-  object-fit: cover;
-}
 
 .login-link {
   text-align: center;
