@@ -1,70 +1,118 @@
 <template>
   <div class="home-page">
-    <div class="header">
+    <!-- 顶部标题区域 -->
+    <div class="header-section">
       <h1 class="main-title">图书馆挠痒大作战</h1>
       <p class="subtitle">学习使人快乐，但是...好痒啊！</p>
     </div>
 
-    <div class="intro-section">
-    <div class="intro-card">
-      <h3>游戏介绍</h3>
-      <p>欢迎来到图书馆！在这里，你需要专心学习，但是...</p>
-      <p>身上突然开始痒了起来！你需要在学习和挠痒之间找到平衡。</p>
-      <p>小心杨同学的监视，被抓到就要被诬告了！</p>
-      <div class="play-stats">
-        <el-statistic title="总游玩次数" :value="playStats.total_plays || 0" class="stat-item">
-          <template #suffix>
-            <el-icon><User /></el-icon>
-          </template>
-        </el-statistic>
-      </div>
-    </div>
-    </div>
-
-    <div class="user-section" v-if="currentUser">
-      <div class="user-info">
-        <img v-if="currentUser.avatar_url" :src="currentUser.avatar_url" alt="avatar" class="avatar">
-        <div class="user-details">
-          <h3>{{ currentUser.username }}</h3>
-          <p>欢迎回来！</p>
+    <!-- 主要内容区域 -->
+    <div class="main-container">
+      <!-- 用户信息区域 -->
+      <div class="user-section" v-if="currentUser">
+        <div class="user-card">
+          <div class="user-avatar">
+            <img v-if="currentUser.avatar_url" :src="currentUser.avatar_url" alt="avatar" class="avatar">
+            <div v-else class="avatar-placeholder">{{ currentUser.username.charAt(0).toUpperCase() }}</div>
+          </div>
+          <div class="user-info">
+            <h3>欢迎回来，{{ currentUser.username }}！</h3>
+            <p>准备好开始新的挑战了吗？</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="action-buttons">
-      <el-button type="primary" size="large" @click="startGame" class="start-btn">
-        开始挑战
-      </el-button>
-      <el-button type="success" size="large" @click="toggleLeaderboard" class="rank-btn">
-        查看排行榜
-      </el-button>
-    </div>
-
-    <div class="leaderboard-section" v-if="showLeaderboard">
-      <h3>排行榜</h3>
-      <div class="leaderboard-list">
-        <div
-          v-for="(player, index) in leaderboard"
-          :key="index"
-          class="leaderboard-item"
-          :class="{ 'top-player': index < 3 }"
-        >
-          <span class="rank">{{ index + 1 }}</span>
-          <img v-if="player.avatar_url" :src="player.avatar_url" alt="avatar" class="player-avatar">
-          <span class="username">{{ player.username }}</span>
-          <span class="score">{{ player.score }}分</span>
-          <span class="rating">{{ player.rating }}</span>
+      <!-- 游戏介绍卡片 -->
+      <div class="intro-section">
+        <div class="intro-card">
+          <h2>游戏介绍</h2>
+          <div class="intro-content">
+            <p>欢迎来到图书馆！在这里，你需要专心学习，但是...</p>
+            <p>身上突然开始痒了起来！你需要在学习和挠痒之间找到平衡。</p>
+            <p>小心杨xx的监视，被抓到挠痒就要被诬告了！</p>
+          </div>
+          <div class="stats-box">
+            <div class="stat-item">
+              <span class="stat-number">{{ playStats.total_plays || 0 }}</span>
+              <span class="stat-label">总游玩次数</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="auth-buttons" v-if="!currentUser">
-      <el-button @click="goToLogin">登录</el-button>
-      <el-button type="primary" @click="goToRegister">注册</el-button>
-    </div>
+      <!-- 操作按钮区域 -->
+      <div class="action-section">
+        <div class="action-buttons">
+          <el-button
+            type="primary"
+            size="large"
+            @click="startGame"
+            class="action-btn start-btn"
+            :disabled="!currentUser"
+          >
+            <span class="btn-icon">🎮</span>
+            <span class="btn-text">开始挑战</span>
+          </el-button>
 
-    <div class="logout-section" v-if="currentUser">
-      <el-button type="danger" @click="logout">退出登录</el-button>
+          <el-button
+            type="success"
+            size="large"
+            @click="loadLeaderboard"
+            class="action-btn rank-btn"
+          >
+            <span class="btn-icon">🏆</span>
+            <span class="btn-text">刷新排行榜</span>
+          </el-button>
+        </div>
+
+        <div class="auth-section" v-if="!currentUser">
+          <p class="auth-prompt">请先登录或注册账号</p>
+          <div class="auth-buttons">
+            <el-button @click="goToLogin" class="auth-btn login-btn">
+              <span class="btn-icon">🔑</span>
+              <span class="btn-text">登录</span>
+            </el-button>
+            <el-button type="primary" @click="goToRegister" class="auth-btn register-btn">
+              <span class="btn-icon">📝</span>
+              <span class="btn-text">注册</span>
+            </el-button>
+          </div>
+        </div>
+
+        <div class="logout-section" v-if="currentUser">
+          <el-button type="danger" @click="logout" class="logout-btn">
+            <span class="btn-icon">🚪</span>
+            <span class="btn-text">退出登录</span>
+          </el-button>
+        </div>
+      </div>
+
+      <!-- 排行榜区域 -->
+      <div class="leaderboard-section">
+        <div class="leaderboard-card">
+          <h2>🏆 排行榜</h2>
+          <p class="leaderboard-subtitle">前10名学习高手</p>
+          <div class="leaderboard-list">
+            <div
+              v-for="(player, index) in leaderboard"
+              :key="index"
+              class="leaderboard-item"
+              :class="{
+                'top-1': index === 0,
+                'top-2': index === 1,
+                'top-3': index === 2
+              }"
+            >
+              <div class="rank">{{ index + 1 }}</div>
+              <div class="player-details">
+                <div class="player-name">{{ player.username }}</div>
+                <div class="player-rating">{{ player.rating }}</div>
+              </div>
+              <div class="player-score">{{ player.score }}分</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -72,8 +120,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElStatistic } from 'element-plus'
-import { User } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
 
 interface LeaderboardItem {
@@ -90,12 +137,10 @@ interface User {
 }
 
 const router = useRouter()
-const showLeaderboard = ref(false)
 const leaderboard = ref<LeaderboardItem[]>([])
 const currentUser = ref<User | null>(null)
 const playStats = ref({
-  total_plays: 0,
-  registered_plays: 0
+  total_plays: 0
 })
 
 const startGame = () => {
@@ -105,13 +150,6 @@ const startGame = () => {
     return
   }
   router.push('/game')
-}
-
-const toggleLeaderboard = async () => {
-  showLeaderboard.value = !showLeaderboard.value
-  if (showLeaderboard.value) {
-    await loadLeaderboard()
-  }
 }
 
 const loadLeaderboard = async () => {
@@ -159,148 +197,348 @@ const loadPlayStats = async () => {
 
 <style scoped>
 .home-page {
-  max-width: 800px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   padding: 20px;
-  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.header {
+.header-section {
+  text-align: center;
   margin-bottom: 40px;
 }
 
 .main-title {
-  font-size: 36px;
-  color: #409EFF;
-  margin-bottom: 10px;
+  font-size: 42px;
+  font-weight: bold;
+  color: #2d3436;
+  margin: 0 0 10px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-  font-size: 18px;
-  color: #666;
+  font-size: 20px;
+  color: #636e72;
+  margin: 0;
 }
 
-.intro-section {
-  margin-bottom: 40px;
-}
-
-.intro-card {
-  background: #f5f7fa;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-
-.intro-card h3 {
-  color: #303133;
-  margin-bottom: 15px;
-}
-
-.intro-card p {
-  color: #606266;
-  line-height: 1.6;
-  margin: 10px 0;
+.main-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
 }
 
 .user-section {
-  margin-bottom: 30px;
+  width: 100%;
+  max-width: 400px;
 }
 
-.user-info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 15px;
+.user-card {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.user-avatar {
+  margin-bottom: 15px;
 }
 
 .avatar {
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
 }
 
-.action-buttons {
-  margin-bottom: 30px;
+.avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0 auto;
 }
 
-.play-stats {
-  margin: 20px 0;
-  padding: 15px;
-  background: #f5f7fa;
-  border-radius: 8px;
+.user-info h3 {
+  font-size: 20px;
+  color: #2d3436;
+  margin: 0 0 5px 0;
+}
+
+.user-info p {
+  font-size: 14px;
+  color: #909399;
+  margin: 0;
+}
+
+.intro-section {
+  width: 100%;
+  max-width: 600px;
+}
+
+.intro-card {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.intro-card h2 {
+  font-size: 24px;
+  color: #2d3436;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.intro-content p {
+  font-size: 16px;
+  color: #636e72;
+  line-height: 1.6;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.stats-box {
+  margin-top: 20px;
+  text-align: center;
 }
 
 .stat-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
 }
 
-.start-btn, .rank-btn {
-  margin: 0 10px;
+.stat-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: #409EFF;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-top: 5px;
+}
+
+.action-section {
+  width: 100%;
+  max-width: 400px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.action-btn {
   padding: 15px 30px;
   font-size: 16px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  justify-content: center;
+}
+
+.start-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+}
+
+.start-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rank-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  color: white;
+}
+
+.auth-section {
+  text-align: center;
+}
+
+.auth-prompt {
+  font-size: 14px;
+  color: #909399;
+  margin-bottom: 15px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.auth-btn {
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.login-btn {
+  background: white;
+  color: #667eea;
+  border: 1px solid #667eea;
+}
+
+.register-btn {
+  background: #667eea;
+  border: none;
+  color: white;
+}
+
+.logout-btn {
+  width: 100%;
+  background: #ff6b6b;
+  border: none;
+  color: white;
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+.btn-text {
+  font-weight: 500;
 }
 
 .leaderboard-section {
-  margin-top: 30px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.leaderboard-card {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-card h2 {
+  font-size: 24px;
+  color: #2d3436;
+  margin: 0 0 5px 0;
+  text-align: center;
+}
+
+.leaderboard-subtitle {
+  font-size: 14px;
+  color: #909399;
+  text-align: center;
+  margin: 0 0 20px 0;
 }
 
 .leaderboard-list {
-  max-height: 400px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .leaderboard-item {
   display: flex;
   align-items: center;
-  padding: 10px;
-  margin: 5px 0;
-  background: #f5f7fa;
-  border-radius: 5px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
-.top-player {
-  background: #ecf5ff;
-  border-left: 4px solid #409EFF;
+.leaderboard-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.leaderboard-item.top-1 {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+}
+
+.leaderboard-item.top-2 {
+  background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+}
+
+.leaderboard-item.top-3 {
+  background: linear-gradient(135deg, #cd7f32 0%, #daa520 100%);
 }
 
 .rank {
   width: 30px;
-  font-weight: bold;
-  color: #409EFF;
-}
-
-.player-avatar {
-  width: 30px;
   height: 30px;
   border-radius: 50%;
-  margin: 0 10px;
-}
-
-.username {
-  flex: 1;
-  text-align: left;
-}
-
-.score {
+  background: #667eea;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
-  color: #67C23A;
-  margin: 0 10px;
-}
-
-.rating {
-  color: #E6A23C;
   font-size: 14px;
+  margin-right: 12px;
 }
 
-.auth-buttons, .logout-section {
-  margin-top: 20px;
+.player-details {
+  flex: 1;
+}
+
+.player-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3436;
+}
+
+.player-rating {
+  font-size: 12px;
+  color: #909399;
+}
+
+.player-score {
+  font-size: 16px;
+  font-weight: bold;
+  color: #667eea;
+}
+
+@media (max-width: 600px) {
+  .home-page {
+    padding: 10px;
+  }
+
+  .main-title {
+    font-size: 32px;
+  }
+
+  .subtitle {
+    font-size: 16px;
+  }
+
+  .main-container {
+    padding: 0 10px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+  }
 }
 </style>

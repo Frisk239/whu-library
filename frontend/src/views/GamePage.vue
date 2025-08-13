@@ -1,66 +1,91 @@
 <template>
   <div class="game-page">
-    <div class="game-header">
-      <h2>图书馆挠痒大作战</h2>
-      <div class="score-display">
-        学习点: <span class="score">{{ score }}</span>
-      </div>
-    </div>
-
-    <div class="game-area">
-      <div class="itch-meter">
-        <h3>痒值条</h3>
-        <el-progress
-          :percentage="itchLevel"
-          :color="itchColor"
-          :stroke-width="20"
-          :format="formatItchText"
-        />
-      </div>
-
-      <div class="monitor-section" :class="{ 'watching-bg': monitorWatching }">
-        <div class="monitor" :class="{ 'watching': monitorWatching }">
-          <div class="monitor-face">
-            <div class="eyes">
-              <div class="eye" :class="{ 'watching-eye': monitorWatching }"></div>
-              <div class="eye" :class="{ 'watching-eye': monitorWatching }"></div>
-            </div>
-            <div class="mouth" :class="{ 'watching-mouth': monitorWatching }"></div>
-          </div>
-          <div class="monitor-status">
-            {{ monitorWatching ? '正在偷拍！' : '假装看书' }}
-          </div>
+    <div class="game-container">
+      <div class="game-header">
+        <h1 class="game-title">图书馆挠痒大作战</h1>
+        <div class="score-display">
+          <span class="score-label">学习点</span>
+          <span class="score-value">{{ score }}</span>
         </div>
       </div>
 
-      <div class="actions">
-        <el-button
-          type="primary"
-          size="large"
-          @click="study"
-          :disabled="gameOver"
-          class="action-btn"
-        >
-          学习 (+1分)
-        </el-button>
+      <div class="game-content">
+        <div class="itch-section">
+          <h3 class="section-title">痒值条</h3>
+          <div class="progress-container">
+            <el-progress
+              :percentage="itchLevel"
+              :color="itchColor"
+              :stroke-width="25"
+              :format="formatItchText"
+              class="itch-progress"
+            />
+            <div class="progress-labels">
+              <span>0</span>
+              <span>50</span>
+              <span>100</span>
+            </div>
+          </div>
+        </div>
 
-          <el-button
-          type="warning"
-          size="large"
-          @mousedown="startTickling"
-          @mouseup="stopTickling"
-          @mouseleave="stopTickling"
-          :disabled="gameOver"
-          class="action-btn tickle-btn"
-        >
-          长按挠痒 (-6/0.6秒)
-        </el-button>
-      </div>
+        <div class="monitor-section" :class="{ 'warning-mode': monitorWatching }">
+          <div class="monitor-card">
+            <div class="monitor-avatar" :class="{ 'watching': monitorWatching }">
+              <div class="eyes">
+                <div class="eye" :class="{ 'watching-eye': monitorWatching }"></div>
+                <div class="eye" :class="{ 'watching-eye': monitorWatching }"></div>
+              </div>
+              <div class="mouth" :class="{ 'watching-mouth': monitorWatching }"></div>
+            </div>
+            <div class="monitor-status">
+              <span class="status-text">{{ monitorWatching ? '⚠️ 正在偷拍！' : '📚 假装看书' }}</span>
+            </div>
+          </div>
+        </div>
 
-      <div v-if="gameOver" class="game-over">
-        <h3>游戏结束！</h3>
-        <p>最终得分: {{ score }}</p>
-        <el-button type="primary" @click="goToResult">查看结果</el-button>
+        <div class="actions-section">
+          <div class="action-card">
+            <el-button
+              type="primary"
+              size="large"
+              @click="study"
+              :disabled="gameOver"
+              class="action-btn study-btn"
+            >
+              <span class="btn-icon">📖</span>
+              <span class="btn-text">学习</span>
+              <span class="btn-subtext">+1分</span>
+            </el-button>
+          </div>
+
+          <div class="action-card">
+            <el-button
+              type="warning"
+              size="large"
+              @mousedown="startTickling"
+              @mouseup="stopTickling"
+              @mouseleave="stopTickling"
+              @touchstart.prevent="startTickling"
+              @touchend.prevent="stopTickling"
+              :disabled="gameOver"
+              class="action-btn tickle-btn"
+            >
+              <span class="btn-icon">🤏</span>
+              <span class="btn-text">挠痒</span>
+              <span class="btn-subtext">-6/0.6秒</span>
+            </el-button>
+          </div>
+        </div>
+
+        <div v-if="gameOver" class="game-over-modal">
+          <div class="modal-content">
+            <h2>游戏结束！</h2>
+            <p class="final-score">最终得分: {{ score }}</p>
+            <el-button type="primary" @click="goToResult" class="result-btn">
+              查看结果
+            </el-button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -95,20 +120,26 @@ const formatItchText = (percentage: number) => {
 const study = () => {
   if (!gameOver.value) {
     score.value++
+    ElMessage.success('+1 学习点！')
   }
 }
 
 const startTickling = () => {
   if (!gameOver.value) {
     isTickling.value = true
-    // 设置定时器每秒减少痒值
+
     tickleInterval = window.setInterval(() => {
       if (monitorWatching.value && isTickling.value) {
         ElMessage.error('被管理员发现了！游戏结束！')
         endGame()
         return
       }
+
       itchLevel.value = Math.max(0, itchLevel.value - 6)
+
+      if (itchLevel.value === 0) {
+        ElMessage.success('不痒了！')
+      }
     }, 600)
   }
 }
@@ -124,9 +155,12 @@ const stopTickling = () => {
 const increaseItch = () => {
   if (!gameOver.value) {
     itchLevel.value = Math.min(100, itchLevel.value + 5)
+
     if (itchLevel.value >= 100) {
       ElMessage.error('太痒了！无法继续学习！')
       endGame()
+    } else if (itchLevel.value >= 80) {
+      ElMessage.warning('好痒啊！')
     }
   }
 }
@@ -135,11 +169,13 @@ const toggleMonitor = () => {
   if (!gameOver.value) {
     monitorWatching.value = !monitorWatching.value
 
-    // 如果正在偷拍，3秒后切换回看书状态
     if (monitorWatching.value) {
+      ElMessage.warning('管理员开始偷拍了！')
+
       setTimeout(() => {
         if (!gameOver.value) {
           monitorWatching.value = false
+          ElMessage.success('管理员继续看书了')
         }
       }, 3000)
     }
@@ -151,7 +187,6 @@ const endGame = () => {
   stopTickling()
   cleanup()
 
-  // 保存游戏记录
   const user = localStorage.getItem('user')
   if (user) {
     const userData = JSON.parse(user)
@@ -163,18 +198,9 @@ const endGame = () => {
       body: JSON.stringify({
         user_id: userData.id,
         score: score.value,
-        is_guest: false
       })
     })
   }
-
-  // 3秒后自动跳转到结果页
-  setTimeout(() => {
-    router.push({
-      path: '/result',
-      query: { score: score.value }
-    })
-  }, 3000)
 }
 
 const goToResult = () => {
@@ -191,12 +217,10 @@ const cleanup = () => {
 }
 
 onMounted(() => {
-  // 每0.7秒增加痒值
   itchInterval = window.setInterval(increaseItch, 700)
 
-  // 每3-8秒切换监察者状态
   const scheduleNextToggle = () => {
-    const delay = Math.random() * 5000 + 3000 // 3-8秒
+    const delay = Math.random() * 5000 + 3000
     monitorInterval = window.setTimeout(() => {
       if (!gameOver.value) {
         toggleMonitor()
@@ -214,142 +238,266 @@ onUnmounted(() => {
 
 <style scoped>
 .game-page {
-  max-width: 600px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
   padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.game-container {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
 }
 
 .game-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
+}
+
+.game-title {
+  font-size: 32px;
+  color: #2d3436;
+  margin: 0 0 20px 0;
 }
 
 .score-display {
-  font-size: 24px;
-  color: #409EFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
-.score {
+.score-label {
+  font-size: 18px;
+  color: #636e72;
+}
+
+.score-value {
+  font-size: 36px;
   font-weight: bold;
+  color: #0984e3;
 }
 
-.game-area {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.game-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
 }
 
-.itch-meter {
-  margin-bottom: 30px;
-}
-
-.monitor-section {
-  margin-bottom: 30px;
+.section-title {
+  font-size: 20px;
+  color: #2d3436;
+  margin: 0 0 15px 0;
   text-align: center;
 }
 
-.monitor {
-  padding: 20px;
-  border-radius: 10px;
-  background: #f5f7fa;
+.progress-container {
+  position: relative;
+}
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 12px;
+  color: #636e72;
+}
+
+.itch-progress {
+  margin-bottom: 10px;
+}
+
+.monitor-section {
   transition: all 0.3s ease;
 }
 
-.monitor.watching {
-  background: #fef0f0;
-  border: 2px solid #f56c6c;
+.monitor-section.warning-mode {
+  animation: pulse 1s infinite;
 }
 
-.monitor-face {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 10px;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.monitor-card {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.monitor-section.warning-mode .monitor-card {
+  background: #fff5f5;
+  border: 2px solid #f56565;
+}
+
+.monitor-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 15px;
   position: relative;
 }
 
 .eyes {
   display: flex;
   justify-content: space-around;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .eye {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   background: #333;
   border-radius: 50%;
   transition: all 0.3s ease;
 }
 
 .watching-eye {
-  background: #f56c6c;
-  transform: scale(1.2);
+  background: #f56565;
+  transform: scale(1.3);
 }
 
 .mouth {
-  width: 40px;
-  height: 10px;
+  width: 30px;
+  height: 8px;
   background: #333;
-  margin: 20px auto 0;
-  border-radius: 5px;
+  margin: 15px auto 0;
+  border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .watching-mouth {
-  background: #f56c6c;
+  background: #f56565;
   transform: rotate(90deg);
 }
 
 .monitor-status {
+  margin-top: 15px;
+}
+
+.status-text {
   font-size: 18px;
   font-weight: bold;
-  color: #606266;
+  color: #2d3436;
 }
 
-.watching-bg {
-  background-color: rgba(245, 108, 108, 0.1);
-  border-radius: 10px;
-  padding: 10px;
-  transition: background-color 0.3s ease;
-}
-
-.actions {
+.actions-section {
   display: flex;
   justify-content: space-around;
-  margin: 100px 0 30px;
-  position: relative;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.action-card {
+  flex: 1;
 }
 
 .action-btn {
-  padding: 20px 40px;
+  width: 100%;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 15px;
+  font-size: 16px;
+}
+
+.btn-icon {
+  font-size: 24px;
+}
+
+.btn-text {
   font-size: 18px;
+  font-weight: bold;
+}
+
+.btn-subtext {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.study-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
 }
 
 .tickle-btn {
-  background: #E6A23C;
-  border-color: #E6A23C;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  color: white;
 }
 
-.tickle-btn:hover {
-  background: #cf9236;
-  border-color: #cf9236;
+.game-over-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-.game-over {
+.modal-content {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
   text-align: center;
-  padding: 20px;
-  background: #f5f7fa;
-  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
-.game-over h3 {
-  color: #f56c6c;
-  margin-bottom: 10px;
+.modal-content h2 {
+  color: #2d3436;
+  margin-bottom: 20px;
 }
 
-.game-over p {
-  font-size: 20px;
-  margin-bottom: 15px;
+.final-score {
+  font-size: 24px;
+  color: #0984e3;
+  margin-bottom: 20px;
+}
+
+.result-btn {
+  padding: 15px 30px;
+  font-size: 18px;
+}
+
+@media (max-width: 600px) {
+  .game-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  .game-title {
+    font-size: 28px;
+  }
+
+  .actions-section {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    height: 100px;
+  }
 }
 </style>
