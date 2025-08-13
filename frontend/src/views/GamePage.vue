@@ -117,10 +117,48 @@ const formatItchText = (percentage: number) => {
   return `${percentage}/100`
 }
 
-const study = () => {
+const study = (event: MouseEvent) => {
   if (!gameOver.value) {
     score.value++
-    ElMessage.success('+1 学习点！')
+    // 创建自定义消息，从按钮位置弹出
+    const message = document.createElement('div')
+    message.className = 'floating-message'
+    message.textContent = '+1 学习点！'
+    message.style.cssText = `
+      position: fixed;
+      top: ${event.clientY - 50}px;
+      left: ${event.clientX - 30}px;
+      background: #67C23A;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 9999;
+      animation: floatUp 1s ease-out forwards;
+      pointer-events: none;
+    `
+
+    const style = document.createElement('style')
+    style.textContent = `
+      @keyframes floatUp {
+        0% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        100% {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+      }
+    `
+    document.head.appendChild(style)
+    document.body.appendChild(message)
+
+    setTimeout(() => {
+      message.remove()
+      style.remove()
+    }, 1000)
   }
 }
 
@@ -130,7 +168,7 @@ const startTickling = () => {
 
     tickleInterval = window.setInterval(() => {
       if (monitorWatching.value && isTickling.value) {
-        ElMessage.error('被管理员发现了！游戏结束！')
+        ElMessage.error('被杨xx偷拍到了！游戏结束！')
         endGame()
         return
       }
@@ -170,12 +208,12 @@ const toggleMonitor = () => {
     monitorWatching.value = !monitorWatching.value
 
     if (monitorWatching.value) {
-      ElMessage.warning('管理员开始偷拍了！')
+      ElMessage.warning('杨xx开始偷拍了！小心被诬告！')
 
       setTimeout(() => {
         if (!gameOver.value) {
           monitorWatching.value = false
-          ElMessage.success('管理员继续看书了')
+          ElMessage.success('杨xx假装继续看书了')
         }
       }, 3000)
     }
