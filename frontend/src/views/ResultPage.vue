@@ -1,34 +1,40 @@
 <template>
   <div class="result-page">
-    <div class="result-card">
-      <h2>游戏结算</h2>
+    <div class="result-container">
+      <div class="result-header">
+        <h1>游戏结算</h1>
+      </div>
 
       <div class="result-content">
-        <div class="score-display">
-          <h3>最终学习点</h3>
-          <div class="score-number">{{ score }}</div>
+        <div class="score-section">
+          <div class="score-label">最终学习点</div>
+          <div class="score-value">{{ score }}</div>
         </div>
 
         <div class="rating-section">
-          <h3>获得评级</h3>
+          <div class="rating-label">获得评级</div>
           <div class="rating-badge" :class="ratingClass">
             {{ rating }}
           </div>
-          <p class="rating-description">{{ ratingDescription }}</p>
         </div>
 
-        <div class="character-display">
-          <div class="character-icon" :class="characterClass">
-            {{ characterEmoji }}
+        <div class="character-section">
+          <div class="character-display">
+            <div class="character-emoji">{{ characterEmoji }}</div>
+            <div class="character-name">{{ characterName }}</div>
           </div>
+        </div>
+
+        <div class="message-section">
+          <div class="message-text">{{ messageText }}</div>
         </div>
       </div>
 
-      <div class="action-buttons">
-        <el-button type="primary" size="large" @click="playAgain">
+      <div class="action-section">
+        <el-button type="primary" size="large" @click="playAgain" class="action-btn">
           再来一局
         </el-button>
-        <el-button size="large" @click="backToMenu">
+        <el-button size="large" @click="backToMenu" class="action-btn">
           返回菜单
         </el-button>
       </div>
@@ -81,12 +87,19 @@ const characterEmoji = computed(() => {
   }
 })
 
-const characterClass = computed(() => {
+const characterName = computed(() => {
   const rating = getRating(score.value)
-  return rating.toLowerCase().replace(/\s+/g, '-')
+  switch (rating) {
+    case '挠痒专业户': return '挠痒大师'
+    case '普通学生': return '学习新手'
+    case '优秀学生': return '学霸'
+    case '学习标兵': return '学神'
+    case '学习之神': return '学仙'
+    default: return '学习者'
+  }
 })
 
-const ratingDescription = computed(() => {
+const messageText = computed(() => {
   const rating = getRating(score.value)
   switch (rating) {
     case '挠痒专业户':
@@ -115,98 +128,141 @@ const backToMenu = () => {
 
 <style scoped>
 .result-page {
-  max-width: 500px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 20px;
 }
 
-.result-card {
+.result-container {
   background: white;
-  padding: 40px;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 60px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   text-align: center;
+  max-width: 500px;
+  width: 100%;
 }
 
-.result-card h2 {
-  color: #303133;
-  margin-bottom: 30px;
-}
-
-.result-content {
+.result-header {
   margin-bottom: 40px;
 }
 
-.score-display {
+.result-header h1 {
+  font-size: 36px;
+  color: #303133;
+  margin: 0;
+}
+
+.result-content {
+  margin-bottom: 50px;
+}
+
+.score-section {
   margin-bottom: 30px;
 }
 
-.score-display h3 {
+.score-label {
+  font-size: 18px;
   color: #606266;
   margin-bottom: 10px;
 }
 
-.score-number {
-  font-size: 48px;
+.score-value {
+  font-size: 72px;
   font-weight: bold;
   color: #409EFF;
+  line-height: 1;
 }
 
 .rating-section {
   margin-bottom: 30px;
 }
 
-.rating-section h3 {
+.rating-label {
+  font-size: 18px;
   color: #606266;
   margin-bottom: 15px;
 }
 
 .rating-badge {
   display: inline-block;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-size: 18px;
+  padding: 15px 30px;
+  border-radius: 50px;
+  font-size: 24px;
   font-weight: bold;
-  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .itch-master {
-  background: #fef0f0;
-  color: #f56c6c;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: #fff;
 }
 
 .normal-student {
-  background: #f0f9ff;
-  color: #409EFF;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #333;
 }
 
 .excellent-student {
-  background: #f6ffed;
-  color: #52c41a;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #333;
 }
 
 .study-model {
-  background: #fff7e6;
-  color: #fa8c16;
+  background: linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%);
+  color: #fff;
 }
 
 .study-god {
-  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
 }
 
-.rating-description {
-  color: #909399;
-  font-size: 16px;
+.character-section {
+  margin-bottom: 30px;
 }
 
 .character-display {
-  margin: 30px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
-.character-icon {
-  font-size: 80px;
+.character-emoji {
+  font-size: 100px;
   animation: bounce 2s infinite;
+}
+
+.character-name {
+  font-size: 20px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.message-section {
+  margin-bottom: 40px;
+}
+
+.message-text {
+  font-size: 18px;
+  color: #606266;
+  line-height: 1.6;
+}
+
+.action-section {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.action-btn {
+  padding: 15px 40px;
+  font-size: 18px;
+  border-radius: 25px;
 }
 
 @keyframes bounce {
@@ -221,14 +277,22 @@ const backToMenu = () => {
   }
 }
 
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
+@media (max-width: 600px) {
+  .result-container {
+    padding: 40px 20px;
+  }
 
-.action-buttons .el-button {
-  padding: 15px 30px;
-  font-size: 16px;
+  .score-value {
+    font-size: 60px;
+  }
+
+  .rating-badge {
+    font-size: 20px;
+    padding: 12px 24px;
+  }
+
+  .character-emoji {
+    font-size: 80px;
+  }
 }
 </style>

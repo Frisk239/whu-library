@@ -10,7 +10,7 @@
       <h3>游戏介绍</h3>
       <p>欢迎来到图书馆！在这里，你需要专心学习，但是...</p>
       <p>身上突然开始痒了起来！你需要在学习和挠痒之间找到平衡。</p>
-      <p>小心图书管理员的监视，被抓到挠痒就糟糕了！</p>
+      <p>小心杨同学的监视，被抓到就要被诬告了！</p>
       <div class="play-stats">
         <el-statistic title="总游玩次数" :value="playStats.total_plays || 0" class="stat-item">
           <template #suffix>
