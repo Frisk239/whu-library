@@ -44,7 +44,7 @@
           学习 (+1分)
         </el-button>
 
-        <el-button
+          <el-button
           type="warning"
           size="large"
           @mousedown="startTickling"
@@ -53,7 +53,7 @@
           :disabled="gameOver"
           class="action-btn tickle-btn"
         >
-          长按挠痒 (-6/0.7秒)
+          长按挠痒 (-6/0.6秒)
         </el-button>
       </div>
 
@@ -109,7 +109,7 @@ const startTickling = () => {
         return
       }
       itchLevel.value = Math.max(0, itchLevel.value - 6)
-    }, 700)
+    }, 600)
   }
 }
 
@@ -162,21 +162,9 @@ const endGame = () => {
       },
       body: JSON.stringify({
         user_id: userData.id,
-        score: score.value
+        score: score.value,
+        is_guest: false
       })
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('保存游戏记录失败')
-      }
-      return response.json()
-    })
-    .then(data => {
-      console.log('游戏记录保存成功:', data)
-    })
-    .catch(error => {
-      console.error('保存游戏记录错误:', error)
-      ElMessage.error('保存游戏记录失败，请检查网络连接')
     })
   }
 

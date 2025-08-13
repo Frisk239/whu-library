@@ -6,12 +6,19 @@
     </div>
 
     <div class="intro-section">
-      <div class="intro-card">
-        <h3>游戏介绍</h3>
-        <p>欢迎来到图书馆！在这里，你需要专心学习，但是...</p>
-        <p>身上突然开始痒了起来！你需要在学习和挠痒之间找到平衡。</p>
-        <p>小心图书管理员的监视，被抓到挠痒就糟糕了！</p>
+    <div class="intro-card">
+      <h3>游戏介绍</h3>
+      <p>欢迎来到图书馆！在这里，你需要专心学习，但是...</p>
+      <p>身上突然开始痒了起来！你需要在学习和挠痒之间找到平衡。</p>
+      <p>小心图书管理员的监视，被抓到挠痒就糟糕了！</p>
+      <div class="play-stats">
+        <el-statistic title="总游玩次数" :value="playStats.total_plays || 0" class="stat-item">
+          <template #suffix>
+            <el-icon><User /></el-icon>
+          </template>
+        </el-statistic>
       </div>
+    </div>
     </div>
 
     <div class="user-section" v-if="currentUser">
@@ -65,7 +72,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElStatistic } from 'element-plus'
+import { User } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 interface LeaderboardItem {
@@ -85,8 +93,17 @@ const router = useRouter()
 const showLeaderboard = ref(false)
 const leaderboard = ref<LeaderboardItem[]>([])
 const currentUser = ref<User | null>(null)
+const playStats = ref({
+  total_plays: 0,
+  registered_plays: 0
+})
 
 const startGame = () => {
+  if (!currentUser.value) {
+    ElMessage.warning('请先登录后再开始游戏')
+    router.push('/login')
+    return
+  }
   router.push('/game')
 }
 
@@ -127,7 +144,17 @@ onMounted(() => {
     currentUser.value = JSON.parse(user)
   }
   loadLeaderboard()
+  loadPlayStats()
 })
+
+const loadPlayStats = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/play-count')
+    playStats.value = response.data
+  } catch (error) {
+    console.error('获取游玩统计失败:', error)
+  }
+}
 </script>
 
 <style scoped>
@@ -195,6 +222,20 @@ onMounted(() => {
 
 .action-buttons {
   margin-bottom: 30px;
+}
+
+.play-stats {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .start-btn, .rank-btn {
