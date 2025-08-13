@@ -18,8 +18,17 @@ export default defineConfig({
     },
   },
   server: {
+    host: '0.0.0.0',
     port: 3000,
     strictPort: true,
+    allowedHosts: [
+      'frp-shy.com',
+      'frp-shy.com:12108'
+    ],
+    hmr: {
+      host: 'frp-shy.com',
+      port: 12108
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:5000',
@@ -28,4 +37,9 @@ export default defineConfig({
       }
     }
   },
+  base: '/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets'
+  }
 })
