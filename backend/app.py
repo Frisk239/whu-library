@@ -42,7 +42,6 @@ class GameRecord(db.Model):
     score = db.Column(db.Integer, nullable=False)
     rating = db.Column(db.String(50), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    # 仅记录注册用户游玩
     
     user = db.relationship('User', backref=db.backref('game_records', lazy=True))
 
@@ -171,10 +170,11 @@ def index():
 
 @app.route('/api/play-count')
 def get_play_count():
-    # 获取总游玩次数（仅注册用户）
-    total_plays = db.session.query(db.func.count(GameRecord.id)).scalar()
+    # 直接查询GameRecord表中的记录数
+    total_plays = db.session.query(GameRecord).count()
+    print(f"当前总游戏次数: {total_plays}")
     return jsonify({
-        'total_plays': total_plays or 0
+        'total_plays': total_plays
     })
 
 if __name__ == '__main__':
