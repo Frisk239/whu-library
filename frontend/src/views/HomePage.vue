@@ -80,6 +80,19 @@
         </div>
 
         <div class="logout-section" v-if="currentUser">
+          <el-popconfirm
+            title="确定要注销账号吗？此操作不可撤销！"
+            confirm-button-text="确定"
+            cancel-button-text="取消"
+            @confirm="deleteAccount"
+          >
+            <template #reference>
+              <el-button type="danger" class="delete-account-btn">
+                <span class="btn-icon">🗑️</span>
+                <span class="btn-text">注销账号</span>
+              </el-button>
+            </template>
+          </el-popconfirm>
           <el-button type="danger" @click="logout" class="logout-btn">
             <span class="btn-icon">🚪</span>
             <span class="btn-text">退出登录</span>
@@ -183,6 +196,33 @@ const logout = () => {
   localStorage.removeItem('user')
   currentUser.value = null
   ElMessage.success('已退出登录')
+}
+
+    const deleteAccount = async () => {
+      try {
+        if (!currentUser.value) return
+
+        const response = await axios.post('http://localhost:5000/api/delete-account', {
+          user_id: currentUser.value.id
+        }, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+
+        if (response.data.message) {
+          ElMessage.success(response.data.message)
+          logout() // 注销后自动退出登录
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          ElMessage.error(error.response?.data?.error || '注销账号失败')
+        } else {
+          ElMessage.error('注销账号失败')
+        }
+    console.error('注销账号失败:', error)
+    ElMessage.error('注销账号失败')
+  }
 }
 
 onMounted(() => {
@@ -410,6 +450,19 @@ onActivated(() => {
 
 .register-btn {
   background: #667eea;
+  border: none;
+  color: white;
+}
+
+.logout-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delete-account-btn {
+  width: 100%;
+  background: #ff4757;
   border: none;
   color: white;
 }

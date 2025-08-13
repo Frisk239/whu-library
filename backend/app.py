@@ -7,13 +7,7 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-CORS(app, resources={
-    r"/api/*": {
-        "origins": "*",
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+CORS(app)  # 简化CORS配置，允许所有路由的跨域请求
 logging.basicConfig(level=logging.DEBUG)
 
 # 配置
@@ -101,6 +95,25 @@ def login():
         'id': user.id,
         'username': user.username
     })
+
+# 注销账号
+@app.route('/api/delete-account', methods=['POST'])
+def delete_account():
+    data = request.json
+    user_id = data.get('user_id')
+    
+    if not user_id:
+        return jsonify({'error': '缺少用户ID'}), 400
+    
+    # 只删除用户信息，保留游戏记录
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': '用户不存在'}), 404
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    return jsonify({'message': '账号已注销，游戏记录已保留'})
 
 # 保存游戏记录
 @app.route('/api/game-record', methods=['POST'])
