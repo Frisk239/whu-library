@@ -91,7 +91,7 @@ const handleRegister = async () => {
     if (valid) {
       loading.value = true
       try {
-        const response = await axios.post(`http://localhost:5000/api/register`, {
+        const response = await axios.post(`/api/register`, {
           username: registerForm.value.username,
           password: registerForm.value.password
         })
@@ -114,7 +114,6 @@ const handleRegister = async () => {
     }
   })
 }
-
 
 const goToLogin = () => {
   router.push('/login')
@@ -144,7 +143,6 @@ const goToLogin = () => {
   margin-bottom: 30px;
   color: #303133;
 }
-
 
 .login-link {
   text-align: center;

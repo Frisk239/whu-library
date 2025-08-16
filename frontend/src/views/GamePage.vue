@@ -228,7 +228,7 @@ const endGame = () => {
   const user = localStorage.getItem('user')
   if (user) {
     const userData = JSON.parse(user)
-    fetch('http://localhost:5000/api/game-record', {
+    fetch('/api/game-record', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -521,21 +521,63 @@ onUnmounted(() => {
 }
 
 @media (max-width: 600px) {
+  .game-page {
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
   .game-container {
-    padding: 20px;
-    margin: 10px;
+    padding: 10px;
+    margin: 0;
+    height: 100%;
+    border-radius: 0;
+    max-width: 100%;
+  }
+
+  .game-header {
+    margin-bottom: 20px;
   }
 
   .game-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .score-value {
     font-size: 28px;
   }
 
   .actions-section {
     flex-direction: column;
+    margin-top: 20px;
+    gap: 10px;
   }
 
   .action-btn {
-    height: 100px;
+    height: 80px;
+    font-size: 14px;
+  }
+
+  .btn-icon {
+    font-size: 20px;
+  }
+
+  .btn-text {
+    font-size: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .itch-progress {
+    margin-bottom: 5px;
+  }
+
+  .monitor-card {
+    padding: 15px;
   }
 }
 </style>

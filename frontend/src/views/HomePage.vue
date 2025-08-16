@@ -167,7 +167,7 @@ const startGame = () => {
 
 const loadLeaderboard = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/leaderboard')
+    const response = await axios.get('/api/leaderboard')
     leaderboard.value = response.data
   } catch (error) {
     console.error('获取排行榜失败:', error)
@@ -177,7 +177,7 @@ const loadLeaderboard = async () => {
 
 const loadPlayStats = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/play-count')
+    const response = await axios.get('/api/play-count')
     playStats.value = response.data
   } catch (error) {
     console.error('获取游玩统计失败:', error)
@@ -202,7 +202,7 @@ const logout = () => {
       try {
         if (!currentUser.value) return
 
-        const response = await axios.post('http://localhost:5000/api/delete-account', {
+        const response = await axios.post('/api/delete-account', {
           user_id: currentUser.value.id
         }, {
           headers: {

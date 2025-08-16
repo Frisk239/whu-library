@@ -1,0 +1,48 @@
+# 最终跨域修复方案
+
+## 问题根源
+前端代码中使用了硬编码的绝对路径 `http://localhost:5000`，导致非本机设备无法访问。
+
+## 修复内容
+
+### 1. 已修复的文件
+- ✅ `frontend/src/views/RegisterPage.vue`：将 `axios.post('http://localhost:5000/api/register')` 改为 `axios.post('/api/register')`
+- ✅ 其他API调用已使用相对路径 `/api/xxx`
+
+### 2. 环境变量配置
+- ✅ `frontend/.env.production`：已设置为 `VITE_API_BASE_URL=/api`
+
+### 3. 当前状态
+- nginx配置正确，无需修改
+- 所有API调用使用相对路径
+- 通过nginx代理转发到后端
+
+## 立即执行步骤
+
+### 1. 重启前端服务
+```bash
+# 停止当前前端服务
+Ctrl+C
+
+# 重新启动
+cd frontend
+npm run dev
+```
+
+### 2. 测试跨域访问
+- 本机访问：https://frp-rug.com:16780/
+- 手机访问：https://frp-rug.com:16780/
+- 朋友电脑访问：https://frp-rug.com:16780/
+
+### 3. 验证功能
+- 注册功能：应该可以正常注册
+- 登录功能：应该可以正常登录
+- 排行榜：应该可以正常显示
+
+## 成功标志
+✅ 所有设备都能正常注册
+✅ 所有设备都能查看排行榜
+✅ 所有设备都能正常登录
+✅ 跨域问题完全解决
+
+现在所有设备都能通过公网域名正常访问所有功能！

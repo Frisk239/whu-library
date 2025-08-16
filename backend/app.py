@@ -7,7 +7,8 @@ from datetime import datetime
 import os
 
 app = Flask(__name__)
-CORS(app)  # 简化CORS配置，允许所有路由的跨域请求
+# 增强CORS配置，允许所有来源的跨域请求
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 logging.basicConfig(level=logging.DEBUG)
 
 # 配置
@@ -191,4 +192,4 @@ def get_play_count():
     })
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000, host='0.0.0.0')
